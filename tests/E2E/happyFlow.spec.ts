@@ -1,41 +1,32 @@
-import {test , expect } from "../../fixtures/fixtures";
-import { LoginPage } from "../../pages/LoginPage";
-import { ProductPage } from "../../pages/ProductPage";
-import { CartPage } from "../../pages/CartPage";
-
-test.only("Validate Happy E2E flow", async({page})=>{
-
-await page.goto("https://www.saucedemo.com/");
- const loginPage= new LoginPage(page);
- await loginPage.goTo();
- await loginPage.Login("standard_user","secret_sauce");
- await expect(loginPage.inventoryContainer).toBeVisible();
+import { test, expect } from "../../fixtures/fixtures";
 
 
- //To add Product to Cart-list
- const productPage = new ProductPage(page);
- await productPage.addProductToCart("Sauce Labs Backpack");
- //Click on Shopping Cart Link
- await productPage.clickOnShoppingCart();
- await expect(page).toHaveURL("https://www.saucedemo.com/cart.html");
+test.only("Validate Happy E2E flow", async ({ authenticatedPage , productPage, cartPage, checkoutPage, orderSummaryPage }) => {
+    let productAdded = "Sauce Labs Backpack";
 
- //Cart Page
- const cartPage = new CartPage(page);
- await expect(page.locator(".cart_list")).toBeVisible();
- await expect(page.locator(".inventory_item_name")).toHaveText("Sauce Labs Backpack");
+    //Login already added in fixture.ts-> authenticated 
+    //To add Product to Cart-list
+   
+    await productPage.addProductToCart(productAdded);
+    //Click on Shopping Cart Link
+    await productPage.clickOnShoppingCart();
+    await expect(authenticatedPage).toHaveURL(productPage.cartURL);
 
- //Click On Checkout
- await page.getByRole("button",{name : "checkout"}).click();
- await expect(page).toHaveURL("https://www.saucedemo.com/checkout-step-one.html");
+    //Cart Page
+    
+    await expect(cartPage.cartList).toBeVisible();
+    await expect(cartPage.itemName).toHaveText(productAdded);
+    //Click On Checkout
+    cartPage.checkoutItem()
+    await expect(authenticatedPage).toHaveURL(cartPage.checkoutUrl);
 
-//Add user details
-await expect(page.locator(".checkout_info_wrapper")).toBeVisible();
-await page.getByPlaceholder("First Name").fill("John");
-await page.getByPlaceholder("Last Name").fill("Test");
-await page.getByPlaceholder("Zip/Postal Code").fill("12345");
+    //Add user details
+   
+    await expect(checkoutPage.checkOutList).toBeVisible();
+    checkoutPage.checkoutUser("John", "Test" , "1234");
 
-await page.getByRole("button",{name : "continue"}).click();
-
-await page.locator(".cart_list").isVisible();
-expect (page.locator('[data-test="inventory-item-name"]')).toHaveText("Sauce Labs Backpack");
+    //Order Sumary page
+    
+    await expect(orderSummaryPage.orderSummaryList).toBeVisible();
+    await expect(orderSummaryPage.itemName).toHaveText(productAdded);
 })
