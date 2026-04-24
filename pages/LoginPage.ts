@@ -20,7 +20,7 @@ async goTo(){
     await this.page.goto("https://www.saucedemo.com/")
 }
 
-async Login(usr:string, pwd:string)
+async login(usr:string, pwd:string)
 {
     await this.standardUser.fill(usr);
      await this.password.fill(pwd);
