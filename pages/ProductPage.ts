@@ -1,14 +1,18 @@
-import { Page, Locator } from "@playwright/test";
+import { Page, Locator , expect } from "@playwright/test";
 
 export class ProductPage {
-  readonly page: Page;
-  readonly shoppingCartLink: Locator;
+  private readonly page: Page;
+  private readonly shoppingCartLink: Locator;
+  private readonly pageTitle :Locator;
+  private readonly inventory: Locator;
 
 
 
   constructor(page: Page) {
     this.page = page;
-    this.shoppingCartLink = page.locator(".shopping_cart_link")
+    this.shoppingCartLink = page.locator(".shopping_cart_link");
+    this.pageTitle=page.locator(".title");
+    this.inventory=page.locator(".inventory_item")
 
   }
 
@@ -16,7 +20,7 @@ export class ProductPage {
     await this.page
       .locator('[data-test="inventory-item"]')
       .filter({ hasText: productName })
-      .locator('[data-test="add-to-cart-sauce-labs-backpack"]')
+      .getByRole("button", { name: /add to cart/i })
       .click();
   }
 
@@ -24,8 +28,19 @@ export class ProductPage {
     await this.shoppingCartLink.click();
   }
 
-  get cartURL() {
-    return "https://www.saucedemo.com/cart.html"
+
+  // async addProduct2ToCart(productName:string){
+  //   await this.page
+  //   .locator('[data-test="inventory-item"]')
+  //   .filter({hasText : productName})
+  //   .locator('[data-test="add-to-cart-sauce-labs-fleece-jacket"]')
+  //   .click()
+  // }
+
+  async waitUntilLoaded(){
+    await expect(this.page).toHaveURL("/inventory.html");
+    await expect(this.pageTitle).toHaveText("Products");
+    await expect(this.inventory.first()).toBeVisible()
   }
 
 }

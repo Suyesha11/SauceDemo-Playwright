@@ -58,7 +58,7 @@ export const test = base.extend<MyFixtures>({
    authenticatedPage: async ({ page }, use) => {
       const loginPage = new LoginPage(page);
       await loginPage.goTo();
-      await loginPage.Login("standard_user", "secret_sauce");
+      await loginPage.login("standard_user", "secret_sauce");
       await page.waitForURL('**/inventory.html');
       await use(page); //Return logged-in page
    },

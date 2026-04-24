@@ -25,14 +25,14 @@ export default defineConfig({
   reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   timeout: 15000, // ⏱ total test timeout (optional)
-  
+
   use: {
     /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: 'https://automationintesting.online/',
-    
+    baseURL: 'https://www.saucedemo.com',
+
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    
+
   },
 
   /* Configure projects for major browsers */

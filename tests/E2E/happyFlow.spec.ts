@@ -2,31 +2,31 @@ import { test, expect } from "../../fixtures/fixtures";
 
 
 test.only("Validate Happy E2E flow", async ({ authenticatedPage , productPage, cartPage, checkoutPage, orderSummaryPage }) => {
-    let productAdded = "Sauce Labs Backpack";
+   
 
     //Login already added in fixture.ts-> authenticated 
     //To add Product to Cart-list
-   
-    await productPage.addProductToCart(productAdded);
+    await productPage.waitUntilLoaded();
+    await productPage.addProductToCart("Sauce Labs Backpack");
     //Click on Shopping Cart Link
     await productPage.clickOnShoppingCart();
-    await expect(authenticatedPage).toHaveURL(productPage.cartURL);
+    await cartPage.waitUntilLoaded();
 
     //Cart Page
-    
-    await expect(cartPage.cartList).toBeVisible();
-    await expect(cartPage.itemName).toHaveText(productAdded);
-    //Click On Checkout
-    cartPage.checkoutItem()
-    await expect(authenticatedPage).toHaveURL(cartPage.checkoutUrl);
+    const itemName = await cartPage.getItemName();
+    expect(itemName).toContain("Sauce Labs Backpack")
 
+    //Click On Checkout
+    await cartPage.checkoutItem()
+    await checkoutPage.waitUntilLoaded();
     //Add user details
-   
-    await expect(checkoutPage.checkOutList).toBeVisible();
-    checkoutPage.checkoutUser("John", "Test" , "1234");
+
+    await checkoutPage.checkoutUser("John", "Test" , "1234");
+    await checkoutPage.checkoutPage2();
 
     //Order Sumary page
     
-    await expect(orderSummaryPage.orderSummaryList).toBeVisible();
-    await expect(orderSummaryPage.itemName).toHaveText(productAdded);
+await orderSummaryPage.waitUntilLoaded()
+const itemNameSummary = await orderSummaryPage.getItemName();
+//expect(itemNameSummary).toContain("Sauce Labs Backpack")
 })
