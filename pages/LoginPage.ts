@@ -2,11 +2,11 @@ import{Page,Locator} from '@playwright/test'
 
 export class LoginPage{
 
-readonly page : Page;
-readonly header : Locator;
-readonly standardUser : Locator;
-readonly password : Locator;
-readonly loginButton : Locator;
+private readonly page : Page;
+private readonly header : Locator;
+private readonly standardUser : Locator;
+private readonly password : Locator;
+private readonly loginButton : Locator;
 
 constructor(page:Page){
     this.page=page;
@@ -17,10 +17,10 @@ constructor(page:Page){
 }
 
 async goTo(){
-    await this.page.goto("https://www.saucedemo.com/")
+    await this.page.goto("/")
 }
 
-async Login(usr:string, pwd:string)
+async login(usr:string, pwd:string)
 {
     await this.standardUser.fill(usr);
      await this.password.fill(pwd);
