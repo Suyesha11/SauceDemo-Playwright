@@ -1,7 +1,7 @@
 import { test, expect } from "../../fixtures/fixtures";
 
 
-test.only("Validate Happy E2E flow", async ({ authenticatedPage , productPage, cartPage, checkoutPage, orderSummaryPage }) => {
+test("Validate Happy E2E flow", async ({ authenticatedPage , productPage, cartPage, checkoutPage, orderSummaryPage }) => {
    
 
     //Login already added in fixture.ts-> authenticated 
