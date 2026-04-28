@@ -1,4 +1,10 @@
-export const testUsers={
+export type User = {
+    username : string,
+    password : string
+}
+
+
+export const testUsers ={
     standard:{
         username : 'standard_user',
         password :'secret_sauce'

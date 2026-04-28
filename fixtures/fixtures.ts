@@ -4,7 +4,7 @@ import { CartPage } from "../pages/CartPage";
 import { ProductPage } from "../pages/ProductPage";
 import { CheckoutUser } from "../pages/CheckoutUser";
 import { OrderSummaryPage } from "../pages/OrderSummaryPage";
-import { testUsers, checkoutInfo, products } from "./testData";
+import { testUsers, checkoutInfo, products } from "../data/testData";
 
 type MyFixtures = {
   loginpage: LoginPage;
