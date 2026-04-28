@@ -1,6 +1,6 @@
-import { test, expect } from "../../fixtures/fixtures";
-import { testUsers } from "../../data/testData";
-import { LoginPage } from "../../pages/LoginPage"
+import { test, expect } from "../../../fixtures/fixtures";
+import { testUsers } from "../../../data/testData";
+
 
 test.describe("Login Page scenarios", ()=>{
   

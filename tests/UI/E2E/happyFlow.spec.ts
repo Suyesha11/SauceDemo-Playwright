@@ -1,4 +1,4 @@
-import { test, expect } from "../../fixtures/fixtures";
+import { test, expect } from "../../../fixtures/fixtures";
 
 
 test("Validate Happy E2E flow", async ({ authenticatedPage , productPage, cartPage, checkoutPage, orderSummaryPage }) => {
