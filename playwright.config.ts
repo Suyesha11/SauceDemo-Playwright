@@ -11,7 +11,15 @@ export default defineConfig({
   forbidOnly: CI, // Fail build if test.only is committed
   retries: CI ? 2 : 0, // Retry flaky tests in CI only
   workers: CI ? 2 : undefined, // Limit parallelism in CI to avoid resource issues
-  reporter: CI ? [['html'], ['github']] : 'list',
+  reporter: [
+    ['list'],                                    // Console output during run
+    ['html', { open: 'never' }],                 // Built-in HTML report
+    ['allure-playwright', {
+      detail: true,
+      outputFolder: 'allure-results',
+      suiteTitle: false,
+    }],
+  ],
   
   timeout: 30_000, // ⏱ total test timeout (optional)
 

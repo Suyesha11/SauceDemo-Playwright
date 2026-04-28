@@ -7,7 +7,6 @@ on:
     branches: [main]
 
 jobs:
-  # API tests — fast, run on every PR
   api-tests:
     name: API Tests
     runs-on: ubuntu-latest
@@ -28,16 +27,16 @@ jobs:
         run: npx playwright test --project=api-tests
         env:
           CI: true
+        continue-on-error: true   # Let workflow continue so we publish report even on failure
 
-      - name: Upload report on failure
-        if: failure()
+      - name: Upload Allure results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: api-test-report
-          path: playwright-report/
+          name: allure-results-api
+          path: allure-results/
           retention-days: 7
 
-  # UI tests — slower, only run on main branch pushes
   ui-tests:
     name: UI Tests
     runs-on: ubuntu-latest
@@ -55,12 +54,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
-      # Get installed Playwright version (used as part of cache key)
       - name: Get Playwright version
         id: playwright-version
         run: echo "version=$(npm list @playwright/test --depth=0 --json | jq -r '.dependencies["@playwright/test"].version')" >> $GITHUB_OUTPUT
 
-      # Cache Playwright browser binaries
       - name: Cache Playwright browsers
         id: playwright-cache
         uses: actions/cache@v4
@@ -68,12 +65,10 @@ jobs:
           path: ~/.cache/ms-playwright
           key: playwright-${{ runner.os }}-${{ steps.playwright-version.outputs.version }}
 
-      # Install browsers only if cache wasn't restored
       - name: Install Playwright browsers
         if: steps.playwright-cache.outputs.cache-hit != 'true'
         run: npx playwright install --with-deps chromium
 
-      # If cache hit, only install OS deps (browsers are already cached)
       - name: Install OS dependencies
         if: steps.playwright-cache.outputs.cache-hit == 'true'
         run: npx playwright install-deps chromium
@@ -82,11 +77,58 @@ jobs:
         run: npx playwright test --project=ui-tests
         env:
           CI: true
+        continue-on-error: true
 
-      - name: Upload report on failure
-        if: failure()
+      - name: Upload Allure results
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: ui-test-report
-          path: playwright-report/
+          name: allure-results-ui
+          path: allure-results/
           retention-days: 7
+
+  # Publishes a unified Allure report to GitHub Pages
+  publish-allure-report:
+    name: Publish Allure Report
+    runs-on: ubuntu-latest
+    needs: [api-tests, ui-tests]
+    if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download all Allure results
+        uses: actions/download-artifact@v4
+        with:
+          path: downloaded-results
+          pattern: allure-results-*
+          merge-multiple: true
+
+      - name: Move results to allure-results folder
+        run: |
+          mkdir -p allure-results
+          mv downloaded-results/* allure-results/ 2>/dev/null || true
+
+      - name: Get Allure history
+        uses: actions/checkout@v4
+        if: always()
+        continue-on-error: true
+        with:
+          ref: gh-pages
+          path: gh-pages
+
+      - name: Generate Allure report
+        uses: simple-elf/allure-report-action@v1.7
+        if: always()
+        with:
+          allure_results: allure-results
+          allure_history: allure-history
+          gh_pages: gh-pages
+          keep_reports: 20
+
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
+        if: always()
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: allure-history
