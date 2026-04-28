@@ -1,47 +1,49 @@
-import { defineConfig, devices } from '@playwright/test';
+import { defineConfig, devices } from "@playwright/test";
 
-/**
- * Read environment variables from file.
- * https://github.com/motdotla/dotenv
- */
-// import dotenv from 'dotenv';
-// import path from 'path';
-// dotenv.config({ path: path.resolve(__dirname, '.env') });
+// Environment flags — set by CI or local commands
+const CI = !!process.env.CI;                      // true in any CI environment
+const RUN_UI = process.env.RUN_UI !== 'false';    // UI tests run by default unless explicitly disabled
+const RUN_API = process.env.RUN_API !== 'false';  // API tests run by default unless explicitly disabled
 
-/**
- * See https://playwright.dev/docs/test-configuration.
- */
 export default defineConfig({
-  testDir: './tests',
- 
-  /* Run tests in files in parallel */
+  testDir: "./tests",
   fullyParallel: true,
-  /* Fail the build on CI if you accidentally left test.only in the source code. */
-  forbidOnly: true,
-  /* Retry on CI only */
-  retries: 0,
-  /* Opt out of parallel tests on CI. */
-  workers: 3,
-  /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: 'html',
-  /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
-  timeout: 15000, // ⏱ total test timeout (optional)
+  forbidOnly: CI, // Fail build if test.only is committed
+  retries: CI ? 2 : 0, // Retry flaky tests in CI only
+  workers: CI ? 2 : undefined, // Limit parallelism in CI to avoid resource issues
+  reporter: CI ? [['html'], ['github']] : 'list',
+  
+  timeout: 30_000, // ⏱ total test timeout (optional)
 
   use: {
-    /* Base URL to use in actions like `await page.goto('')`. */
-    baseURL: 'https://www.saucedemo.com',
-
-    /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
-    trace: 'on-first-retry',
-
+    trace: "on-first-retry",
+    screenshot:"only-on-failure",
+    video:CI ? 'retain-on-failure' : "off",
   },
 
   /* Configure projects for major browsers */
   projects: [
-    {
-      name: 'chromium',
-      use: { ...devices['Desktop Chrome'] },
-    },
+
+    // UI tests — only run when UI project is enabled
+    ...(RUN_UI ? [{
+      name: 'ui-tests',
+      testDir: './tests/UI',
+      use: {
+        baseURL: 'https://www.saucedemo.com',
+        ...devices['Desktop Chrome'],
+      },
+    }] : []),
+
+    // API tests — always run when API project is enabled
+    ...(RUN_API ? [{
+      name: 'api-tests',
+      testDir: './tests/API',
+      use: {
+        baseURL: 'https://dummyjson.com',
+        extraHTTPHeaders: { 'Content-Type': 'application/json' },
+      },
+    }] : []),
+    
 
     // {
     //   name: 'firefox',
