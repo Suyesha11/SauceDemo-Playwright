@@ -1,30 +1,30 @@
-import {test,expect } from "../../fixtures/ItemAdded"
+import { test, expect } from "../../fixtures/fixtures";
 
+test("Checkout Multiple Items Via Continue ", async ({
+  cartWithItem,
+  productPage,
+  cartPage,
+  checkoutPage,
+  orderSummaryPage,
+}) => {
+  await cartWithItem.clickContinueShopping();
+  await productPage.waitUntilLoaded();
 
-test("Checkot Multiple Items Via Continue ", async({ cartWithItem , productPage , cartPage , checkoutUser , orderSummaryPage})=>{
+  //Add Another Product
+  await productPage.addProductToCart("Sauce Labs Fleece Jacket");
+  await productPage.clickOnShoppingCart();
 
-     await cartWithItem.clickContinueShopping();
-     await productPage.waitUntilLoaded();
+  const cartItem = await cartPage.getItemList();
+  expect(cartItem).toHaveLength(2);
+  await cartPage.checkoutItem();
+  await checkoutPage.waitUntilLoaded();
+  //Add user details
 
-    //Add Another Product
-    await productPage.addProductToCart("Sauce Labs Fleece Jacket");
-    await productPage.clickOnShoppingCart();
+  await checkoutPage.checkoutUser("John", "Test", "1234");
+  await checkoutPage.checkoutPage2();
 
-   await cartPage.getItemList();
-   await expect(cartPage.getItemList()).toHaveLength(2);
-   await cartPage.checkoutItem()
-    await checkoutUser.waitUntilLoaded();
-    //Add user details
+  //Order Sumary page
 
-    await checkoutUser.checkoutUser("John", "Test" , "1234");
-    await checkoutUser.checkoutPage2();
-
-    //Order Sumary page
-    
-await orderSummaryPage.waitUntilLoaded()
-await orderSummaryPage.checkThankyouMessage();
-
-
-
-
-})
+  await orderSummaryPage.waitUntilLoaded();
+  await orderSummaryPage.checkThankyouMessage();
+});
